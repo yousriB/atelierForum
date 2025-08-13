@@ -150,7 +150,7 @@ export const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
               </SelectContent>
             </Select>
           </div>
-
+          {/* 
           <div className="space-y-2">
             <Label htmlFor="notes">Notes (optionnel)</Label>
             <Textarea
@@ -160,7 +160,7 @@ export const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
             />
-          </div>
+          </div> */}
 
           <AnimatePresence>
             {selectedStatus && (

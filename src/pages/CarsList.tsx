@@ -26,6 +26,7 @@ import {
   List as ListIcon,
   Car as CarIcon,
   RefreshCw,
+  Download,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { carMarques, repairStatuses } from "@/data/mockData";
@@ -106,6 +107,61 @@ export const CarsList: React.FC = () => {
     setFilters({ search: "", marque: "", status: "" });
   };
 
+  const exportCsv = () => {
+    const rows = filteredCars.map((c) => ({
+      Marque: c.marque,
+      Modèle: c.model,
+      Matricule: c.matricule,
+      Client: `${c.clientName} ${c.clientLastName}`.trim(),
+      Assurance: c.assuranceCompany,
+      "Type de réparation": c.typeReparation,
+      Statut: c.currentStatus,
+      "Date d'arrivée": c.dateArrivee,
+      Kilométrage: c.kilometrage,
+    }));
+
+    const headers = Object.keys(
+      rows[0] || {
+        Marque: "",
+        Modèle: "",
+        Matricule: "",
+        Client: "",
+        Assurance: "",
+        "Type de réparation": "",
+        Statut: "",
+        "Date d'arrivée": "",
+        Kilométrage: "",
+      }
+    );
+
+    const escapeCsv = (val: unknown) => {
+      const str = String(val ?? "");
+      const needsQuotes = /[",\n;]/.test(str);
+      const escaped = str.replace(/"/g, '""');
+      return needsQuotes ? `"${escaped}"` : escaped;
+    };
+
+    const csvLines = [
+      headers.join(","),
+      ...rows.map((r) =>
+        headers.map((h) => escapeCsv((r as any)[h])).join(",")
+      ),
+    ];
+
+    const blob = new Blob(["\ufeff" + csvLines.join("\n")], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const date = new Date().toISOString().slice(0, 10);
+    link.href = url;
+    link.download = `vehicules_${date}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   useEffect(() => {
     const fetchCars = async () => {
       setIsLoading(true);
@@ -131,7 +187,7 @@ export const CarsList: React.FC = () => {
             },
           ];
 
-          const car: Car = {
+          return {
             id: String(row.id ?? row.uuid ?? row.matricule),
             clientName: row.client_name,
             clientLastName: row.client_lastname,
@@ -140,7 +196,6 @@ export const CarsList: React.FC = () => {
             marque: row.marque,
             chargee_de_dossier: row.chargee_de_dossier,
             assuranceCompany: row.assurance_company,
-            // typeReparation is text[] in DB; our type expects string for display
             typeReparation: Array.isArray(row.type_reparation)
               ? (row.type_reparation as string[]).join(", ")
               : String(row.type_reparation ?? ""),
@@ -151,10 +206,14 @@ export const CarsList: React.FC = () => {
             createdAt: row.date_arrivee,
             updatedAt: statusChangedAt,
           };
-          return car;
         });
 
-        setCars(mapped);
+        // FILTER OUT CARS WITH STATUS 'Sortie'
+        const filteredOutSortie = mapped.filter(
+          (car) => car.currentStatus !== "Sortie"
+        );
+
+        setCars(filteredOutSortie);
       } catch (err: any) {
         console.error(err);
         toast({
@@ -205,6 +264,16 @@ export const CarsList: React.FC = () => {
             onClick={() => setViewMode("table")}
           >
             <ListIcon className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportCsv}
+            className="flex items-center gap-2"
+            title="Exporter en CSV"
+          >
+            <Download className="h-4 w-4" />
+            Exporter
           </Button>
         </div>
       </div>

@@ -51,7 +51,9 @@ export const Dashboard: React.FC = () => {
         if (error) throw error;
         const row = Array.isArray(data) ? data[0] : data;
         if (row) {
-          setTotalCars(Number(row?.total_cars ?? 0));
+          setTotalCars(
+            Number(row?.total_cars ?? 0) - Number(row?.sortie_cars ?? 0)
+          );
           setReadyCars(Number(row?.ready_cars ?? 0));
           setInProgressCars(Number(row?.in_progress_cars ?? 0));
           setPendingCars(Number(row?.pending_cars ?? 0));
@@ -59,13 +61,16 @@ export const Dashboard: React.FC = () => {
           throw new Error("Empty stats result");
         }
       } catch (err) {
-        // Fallback: compute stats client-side with flexible column names
+        // Fallback: compute stats client-side excluding 'Sortie'
         try {
           const { data: carsData, error: carsError } = await supabase
             .from("cars")
             .select("*");
           if (carsError) throw carsError;
-          const list = carsData || [];
+          const list = (carsData || []).filter(
+            (r: any) => r.etat_devis !== "Sortie"
+          );
+
           const getStatus = (row: any): string =>
             row.etat_devis ||
             row.etat ||
@@ -83,10 +88,10 @@ export const Dashboard: React.FC = () => {
           const inProgress = list.filter((r: any) =>
             inProgressSet.has(getStatus(r))
           ).length;
-          const pending = list.filter((r: any) => {
-            const s = getStatus(r);
-            return s !== "Prêt" && !inProgressSet.has(s);
-          }).length;
+          const pending = list.filter(
+            (r: any) =>
+              getStatus(r) !== "Prêt" && !inProgressSet.has(getStatus(r))
+          ).length;
 
           setTotalCars(total);
           setReadyCars(ready);
@@ -105,53 +110,7 @@ export const Dashboard: React.FC = () => {
       }
     };
 
-    const fetchRecent = async () => {
-      setIsLoadingRecent(true);
-      try {
-        const { data, error } = await supabase.from("cars").select("*");
-        if (error) throw error;
-
-        const rows = (data || [])
-          .slice()
-          .sort((a: any, b: any) => {
-            const getTime = (r: any) =>
-              new Date(
-                r.etat_updated_at || r.updated_at || r.date_arrivee || 0
-              ).getTime();
-            return getTime(b) - getTime(a);
-          })
-          .slice(0, 3);
-
-        const mapped: RecentItem[] = rows.map((row: any) => ({
-          id: String(row.id ?? row.uuid ?? row.matricule),
-          matricule: row.matricule,
-          marque: row.marque,
-          model: row.model,
-          clientName: row.client_name || row.clientName,
-          clientLastName: row.client_lastname || row.clientLastName,
-          currentStatus:
-            row.etat_devis ||
-            row.etat ||
-            row.status ||
-            row.current_status ||
-            "",
-          updatedAt: row.etat_updated_at || row.updated_at || row.date_arrivee,
-        }));
-        setRecentActivity(mapped);
-      } catch (err) {
-        console.error(err);
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger l'activité récente",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoadingRecent(false);
-      }
-    };
-
     fetchStats();
-    fetchRecent();
   }, [toast]);
 
   const stats = [
