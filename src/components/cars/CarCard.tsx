@@ -96,6 +96,18 @@ export const CarCard: React.FC<CarCardProps> = ({ car, onUpdateStatus }) => {
                 <p className="text-xs text-muted-foreground">Kilométrage</p>
               </div>
             </div>
+
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-sm font-medium text-automotive-dark">
+                  {car.chargee_de_dossier}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Responsable du dossier
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="flex items-center justify-between pt-3 border-t">

@@ -138,6 +138,7 @@ export const CarsList: React.FC = () => {
             matricule: row.matricule,
             model: row.model,
             marque: row.marque,
+            chargee_de_dossier: row.chargee_de_dossier,
             assuranceCompany: row.assurance_company,
             // typeReparation is text[] in DB; our type expects string for display
             typeReparation: Array.isArray(row.type_reparation)
@@ -355,8 +356,12 @@ export const CarsList: React.FC = () => {
                           Type
                         </th>
                         <th className="text-left p-3 sm:p-4 font-medium text-sm sm:text-base">
+                          Responsable du dossier
+                        </th>
+                        <th className="text-left p-3 sm:p-4 font-medium text-sm sm:text-base">
                           Statut
                         </th>
+
                         <th className="text-left p-3 sm:p-4 font-medium text-sm sm:text-base">
                           Arrivée
                         </th>
@@ -414,6 +419,11 @@ export const CarsList: React.FC = () => {
                             <td className="p-3 sm:p-4">
                               <span className="text-xs sm:text-sm">
                                 {car.typeReparation}
+                              </span>
+                            </td>
+                            <td className="p-3 sm:p-4">
+                              <span className="text-xs sm:text-sm">
+                                {car.chargee_de_dossier}
                               </span>
                             </td>
                             <td className="p-3 sm:p-4">

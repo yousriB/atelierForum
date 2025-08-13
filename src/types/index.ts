@@ -18,6 +18,7 @@ export interface Car {
   kilometrage: number;
   dateArrivee: string;
   currentStatus: RepairStatus;
+  chargee_de_dossier;
   statusHistory: StatusChange[];
   createdAt: string;
   updatedAt: string;
