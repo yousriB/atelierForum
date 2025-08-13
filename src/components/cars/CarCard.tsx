@@ -110,6 +110,12 @@ export const CarCard: React.FC<CarCardProps> = ({ car, onUpdateStatus }) => {
             </div>
           </div>
 
+          {car.note && (
+            <div className="p-3 rounded-md bg-automotive-light/40 border text-sm text-automotive-dark">
+              <span className="font-medium">Note:</span> {car.note}
+            </div>
+          )}
+
           <div className="flex items-center justify-between pt-3 border-t">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />

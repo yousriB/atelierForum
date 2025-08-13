@@ -6,6 +6,7 @@ import * as z from "zod";
 import { supabase } from "../lib/supabaseClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardContent,
@@ -66,6 +67,7 @@ const carSchema = z.object({
       message: "Veuillez sélectionner la chargée de dossier",
     }),
   }),
+  note: z.string().optional().default(""),
 });
 
 type CarFormData = z.infer<typeof carSchema>;
@@ -81,6 +83,7 @@ export const AddCar: React.FC = () => {
       dateArrivee: new Date(),
       typeReparation: [],
       chargeeDeDossier: "Cyrine",
+      note: "",
     },
   });
 
@@ -101,6 +104,7 @@ export const AddCar: React.FC = () => {
         chargee_de_dossier: data.chargeeDeDossier,
         etat_devis: "En Attente de devis",
         etat_updated_at: new Date().toISOString(),
+        note: data.note || null,
       });
 
       if (error) throw error;
@@ -353,6 +357,25 @@ export const AddCar: React.FC = () => {
                             />
                           ))}
                         </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Note (optionnel) */}
+                  <FormField
+                    control={form.control}
+                    name="note"
+                    render={({ field }) => (
+                      <FormItem className="md:col-span-2">
+                        <FormLabel>Note (optionnel)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Ajouter des informations complémentaires..."
+                            rows={3}
+                            {...field}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}

@@ -87,6 +87,7 @@ export const CarsList: React.FC = () => {
               ...car,
               currentStatus: newStatus,
               updatedAt: new Date().toISOString(),
+              note: notes ?? car.note,
               statusHistory: [
                 ...car.statusHistory,
                 {
@@ -118,6 +119,7 @@ export const CarsList: React.FC = () => {
       Statut: c.currentStatus,
       "Date d'arrivée": c.dateArrivee,
       Kilométrage: c.kilometrage,
+      Note: c.note ?? "",
     }));
 
     const headers = Object.keys(
@@ -194,6 +196,7 @@ export const CarsList: React.FC = () => {
             matricule: row.matricule,
             model: row.model,
             marque: row.marque,
+            note: row.note ?? undefined,
             chargee_de_dossier: row.chargee_de_dossier,
             assuranceCompany: row.assurance_company,
             typeReparation: Array.isArray(row.type_reparation)
