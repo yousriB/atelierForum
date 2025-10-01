@@ -11,6 +11,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import icon from "@/assets/icon.png";
+
 
 export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
@@ -31,11 +33,11 @@ export const Navbar: React.FC = () => {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          
-          <Car className="h-6 w-6 sm:h-8 sm:w-8 text-automotive-blue" />
+          <img src={icon} alt="" className='lg:h-10 lg:w-10 hidden lg:block' />
+          {/* <Car className="h-6 w-6 sm:h-8 sm:w-8 text-automotive-blue" /> */}
           <div className="hidden sm:block">
             <h1 className="text-lg sm:text-xl font-bold text-automotive-dark">
-              AutoRepair Pro
+              Forum Auto
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground">
               Système de suivi des réparations

@@ -13,6 +13,7 @@ import {
 import { Car, Mail, Lock, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import showroomBg from "@/assets/showroom-bg.jpg";
+import icon from "@/assets/icon.png";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 
@@ -80,9 +81,7 @@ export const Login: React.FC = () => {
         <Card className="shadow-elegant border-0 bg-card/95 backdrop-blur-md">
           <CardHeader className="space-y-4 text-center p-4 sm:p-6">
             <div className="flex justify-center">
-              <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-gradient-to-r from-automotive-blue to-status-info">
-                <Car className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
-              </div>
+              <img src={icon} className="w-20 h-20" alt="" />
             </div>
             <div>
               <CardTitle className="text-xl sm:text-2xl font-bold text-automotive-dark">
@@ -142,7 +141,7 @@ export const Login: React.FC = () => {
 
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-automotive-blue to-status-info hover:from-automotive-blue/90 hover:to-status-info/90 text-white font-medium py-2.5"
+                className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-500/90 hover:to-red-600/90 text-white font-medium py-2.5"
                 disabled={isLoading}
               >
                 {isLoading ? "Connexion..." : "Se connecter"}

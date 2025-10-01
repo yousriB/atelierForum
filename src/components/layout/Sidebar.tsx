@@ -95,7 +95,7 @@ export const Sidebar: React.FC = () => {
                   cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-accent",
                     isActive
-                      ? "bg-automotive-blue text-white hover:bg-automotive-blue/90"
+                      ? "bg-red-500 text-white hover:bg-red-500/90"
                       : "text-muted-foreground hover:text-foreground"
                   )
                 }
