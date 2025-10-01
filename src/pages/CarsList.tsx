@@ -381,6 +381,7 @@ export const CarsList: React.FC = () => {
                   <SelectItem value="Cyrine">Cyrine</SelectItem>
                   <SelectItem value="Marwa">Marwa</SelectItem>
                   <SelectItem value="Passager">Passager</SelectItem>
+                  <SelectItem value="Groscomptes">Gros comptes</SelectItem>
                 </SelectContent>
               </Select>
 
