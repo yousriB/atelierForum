@@ -48,6 +48,7 @@ export const CarsList: React.FC = () => {
     search: "",
     marque: "",
     status: "",
+    chargeeDeDossier: "",
   });
 
   const filteredCars = useMemo(() => {
@@ -65,8 +66,11 @@ export const CarsList: React.FC = () => {
         filters.marque === "" || car.marque === filters.marque;
       const matchesStatus =
         filters.status === "" || car.currentStatus === filters.status;
+      const matchesChargeeDeDossier =
+        filters.chargeeDeDossier === "" || 
+        (car.chargee_de_dossier && car.chargee_de_dossier.toLowerCase() === filters.chargeeDeDossier.toLowerCase());
 
-      return matchesSearch && matchesMarque && matchesStatus;
+      return matchesSearch && matchesMarque && matchesStatus && matchesChargeeDeDossier;
     });
   }, [cars, filters]);
 
@@ -134,7 +138,7 @@ export const CarsList: React.FC = () => {
   };
 
   const clearFilters = () => {
-    setFilters({ search: "", marque: "", status: "" });
+    setFilters({ search: "", marque: "", status: "", chargeeDeDossier: "" });
   };
 
   const exportCsv = () => {
@@ -337,8 +341,7 @@ export const CarsList: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
               <Select
                 value={filters.status || "all"}
                 onValueChange={(value) =>
@@ -358,6 +361,26 @@ export const CarsList: React.FC = () => {
                       {status}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={filters.chargeeDeDossier || "all"}
+                onValueChange={(value) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    chargeeDeDossier: value === "all" ? "" : value,
+                  }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Chargée de dossier" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Toutes les chargées</SelectItem>
+                  <SelectItem value="Cyrine">Cyrine</SelectItem>
+                  <SelectItem value="Marwa">Marwa</SelectItem>
+                  <SelectItem value="Passager">Passager</SelectItem>
                 </SelectContent>
               </Select>
 

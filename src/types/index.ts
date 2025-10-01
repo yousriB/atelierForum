@@ -53,4 +53,5 @@ export interface CarFilters {
   search: string;
   marque: string;
   status: RepairStatus | '';
+  chargeeDeDossier: string;
 }
