@@ -52,14 +52,14 @@ export const CarsList: React.FC = () => {
 
   const filteredCars = useMemo(() => {
     return cars.filter((car) => {
+      const searchTerm = filters.search.toLowerCase();
       const matchesSearch =
         filters.search === "" ||
-        car.matricule.toLowerCase().includes(filters.search.toLowerCase()) ||
-        car.clientName.toLowerCase().includes(filters.search.toLowerCase()) ||
-        car.clientLastName
-          .toLowerCase()
-          .includes(filters.search.toLowerCase()) ||
-        car.model.toLowerCase().includes(filters.search.toLowerCase());
+        car.matricule.toLowerCase().includes(searchTerm) ||
+        car.clientName.toLowerCase().includes(searchTerm) ||
+        car.clientLastName.toLowerCase().includes(searchTerm) ||
+        car.model.toLowerCase().includes(searchTerm) ||
+        car.marque.toLowerCase().includes(searchTerm);
 
       const matchesMarque =
         filters.marque === "" || car.marque === filters.marque;
@@ -308,28 +308,7 @@ export const CarsList: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-              <Select
-                value={filters.marque || "all"}
-                onValueChange={(value) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    marque: value === "all" ? "" : value,
-                  }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Toutes les marques" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Toutes les marques</SelectItem>
-                  {carMarques.map((marque) => (
-                    <SelectItem key={marque} value={marque}>
-                      {marque}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
 
               <Select
                 value={filters.status || "all"}

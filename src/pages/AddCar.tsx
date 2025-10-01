@@ -62,7 +62,7 @@ const carSchema = z.object({
     .min(1, "Sélectionnez au moins un type de réparation"),
   kilometrage: z.number().min(0, "Le kilométrage doit être positif"),
   dateArrivee: z.date({ required_error: "La date d'arrivée est requise" }),
-  chargeeDeDossier: z.enum(["Cyrine", "Marwa"], {
+  chargeeDeDossier: z.enum(["Cyrine", "Marwa" , "None"], {
     errorMap: () => ({
       message: "Veuillez sélectionner la chargée de dossier",
     }),
@@ -82,7 +82,7 @@ export const AddCar: React.FC = () => {
     defaultValues: {
       dateArrivee: new Date(),
       typeReparation: [],
-      chargeeDeDossier: "Cyrine",
+      chargeeDeDossier: "None",
       note: "",
     },
   });
@@ -397,6 +397,7 @@ export const AddCar: React.FC = () => {
                               <SelectValue placeholder="Sélectionner" />
                             </SelectTrigger>
                             <SelectContent>
+                              <SelectItem value="None">None</SelectItem>
                               <SelectItem value="Cyrine">Cyrine</SelectItem>
                               <SelectItem value="Marwa">Marwa</SelectItem>
                             </SelectContent>
