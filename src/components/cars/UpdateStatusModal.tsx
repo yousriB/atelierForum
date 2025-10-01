@@ -30,6 +30,7 @@ interface UpdateStatusModalProps {
   isOpen: boolean;
   onClose: () => void;
   onUpdate: (carId: string, newStatus: RepairStatus, notes?: string) => void;
+  onDelete?: (car: Car) => Promise<void>;
 }
 
 export const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
@@ -37,6 +38,7 @@ export const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
   isOpen,
   onClose,
   onUpdate,
+  onDelete,
 }) => {
   const [selectedStatus, setSelectedStatus] = useState<RepairStatus | "">("");
   const [notes, setNotes] = useState("");
@@ -180,29 +182,48 @@ export const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
         </motion.div>
 
         <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-4">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            disabled={isLoading}
-            className="flex-1 order-2 sm:order-1"
-          >
-            <X className="h-4 w-4 mr-2" />
-            Annuler
-          </Button>
-          <Button
-            onClick={handleUpdate}
-            disabled={!selectedStatus || isLoading}
-            className="flex-1 order-1 sm:order-2 bg-gradient-to-r from-automotive-blue to-status-info hover:from-automotive-blue/90 hover:to-status-info/90"
-          >
-            {isLoading ? (
-              "Mise à jour..."
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                Mettre à jour
-              </>
+          <div className="flex flex-col sm:flex-row w-full gap-3">
+            {onDelete && (
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={async () => {
+                  if (car && onDelete) {
+                    await onDelete(car);
+                    onClose();
+                  }
+                }}
+                disabled={isLoading}
+                className="flex-1 order-3 mt-2 sm:mt-0 sm:order-1"
+              >
+                <X className="h-4 w-4 mr-2" />
+                Supprimer
+              </Button>
             )}
-          </Button>
+            <Button
+              variant="outline"
+              onClick={onClose}
+              disabled={isLoading}
+              className="flex-1 order-2"
+            >
+              <X className="h-4 w-4 mr-2" />
+              Annuler
+            </Button>
+            <Button
+              onClick={handleUpdate}
+              disabled={!selectedStatus || isLoading}
+              className="flex-1 order-1 bg-gradient-to-r from-automotive-blue to-status-info hover:from-automotive-blue/90 hover:to-status-info/90"
+            >
+              {isLoading ? (
+                "Mise à jour..."
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Mettre à jour
+                </>
+              )}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -19,9 +19,10 @@ import { useAuth } from "@/context/AuthContext";
 interface CarCardProps {
   car: Car;
   onUpdateStatus?: (car: Car) => void;
+  onDelete?: (car: Car) => void;
 }
 
-export const CarCard: React.FC<CarCardProps> = ({ car, onUpdateStatus }) => {
+export const CarCard: React.FC<CarCardProps> = ({ car, onUpdateStatus , onDelete }) => {
   const { user } = useAuth();
   const daysInStatus = calculateDaysInStatus(car);
 
@@ -133,6 +134,16 @@ export const CarCard: React.FC<CarCardProps> = ({ car, onUpdateStatus }) => {
               >
                 <Settings className="h-4 w-4 mr-1" />
                 Modifier Statut
+              </Button>
+            )}
+            {user?.role === "viewer" && onDelete && (
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => onDelete(car)}
+                className="transition-colors"
+              >
+                Supprimer
               </Button>
             )}
           </div>

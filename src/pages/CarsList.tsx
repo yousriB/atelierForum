@@ -104,6 +104,35 @@ export const CarsList: React.FC = () => {
     );
   };
 
+
+
+  const handleDelete = async (car: Car) => {
+    try {
+      const { error } = await supabase
+        .from('cars')
+        .delete()
+        .eq('id', car.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setCars((prevCars) => prevCars.filter((c) => c.id !== car.id));
+      
+      toast({
+        title: "Succès",
+        description: "Le véhicule a été supprimé avec succès",
+        variant: "default",
+      });
+    } catch (error) {
+      console.error('Error deleting car:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la suppression du véhicule",
+        variant: "destructive",
+      });
+    }
+  };
+
   const clearFilters = () => {
     setFilters({ search: "", marque: "", status: "" });
   };
@@ -376,6 +405,11 @@ export const CarsList: React.FC = () => {
                         ? handleUpdateStatus
                         : undefined
                     }
+                    onDelete={
+                      user?.role === "viewer"
+                        ? handleDelete
+                        : undefined
+                    }
                   />
                 </motion.div>
               ))
@@ -412,7 +446,6 @@ export const CarsList: React.FC = () => {
                         <th className="text-left p-3 sm:p-4 font-medium text-sm sm:text-base">
                           Statut
                         </th>
-
                         <th className="text-left p-3 sm:p-4 font-medium text-sm sm:text-base">
                           Arrivée
                         </th>
@@ -427,7 +460,7 @@ export const CarsList: React.FC = () => {
                       {isLoading && filteredCars.length === 0 ? (
                         <tr>
                           <td
-                            colSpan={user?.role === "reception" ? 7 : 6}
+                            colSpan={user?.role === "reception" ? 8 : 7}
                             className="p-6 text-center text-muted-foreground"
                           >
                             Chargement...
@@ -541,7 +574,9 @@ export const CarsList: React.FC = () => {
           setSelectedCar(null);
         }}
         onUpdate={handleStatusUpdate}
+        onDelete={user?.role === "viewer" ? handleDelete : undefined}
       />
-    </div>
+
+      </div>
   );
 };
