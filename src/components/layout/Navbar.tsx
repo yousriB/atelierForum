@@ -21,8 +21,8 @@ export const Navbar: React.FC = () => {
   if (!user) return null;
 
   return (
-    <nav className="border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
-      <div className="flex h-16 items-center justify-between px-3 sm:px-4 md:px-6">
+    <nav className="fixed top-0 left-0 right-0 z-40 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+      <div className="flex h-16 items-center justify-between px-3 sm:px-4 md:px-6 max-w-[100vw]">
         <div className="flex items-center gap-3">
           {/* Mobile hamburger menu */}
           <Button

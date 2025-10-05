@@ -53,7 +53,7 @@ export const Sidebar: React.FC = () => {
         className={cn(
           "fixed lg:relative lg:translate-x-0 inset-y-0 left-0 z-50",
           "w-64 border-r bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60",
-          "flex flex-col h-full"
+          "flex flex-col h-full lg:h-[calc(100vh-4rem)]"
         )}
       >
         <div className="flex h-16 items-center justify-between border-b px-4 sm:px-6">
@@ -122,8 +122,6 @@ export const Sidebar: React.FC = () => {
         </div>
       </motion.aside>
 
-      {/* Desktop sidebar spacer */}
-      {/* <div className="hidden lg:block w-64 flex-shrink-0" /> */}
     </>
   );
 };

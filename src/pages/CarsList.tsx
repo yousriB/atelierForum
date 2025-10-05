@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Car, RepairStatus, ViewMode, CarFilters } from "@/types";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -73,6 +74,26 @@ export const CarsList: React.FC = () => {
       return matchesSearch && matchesMarque && matchesStatus && matchesChargeeDeDossier;
     });
   }, [cars, filters]);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(6);
+  
+  // Calculate pagination
+  const totalItems = filteredCars.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedCars = filteredCars.slice(startIndex, startIndex + itemsPerPage);
+  
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
+  
+  // Update current page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters.search, filters.marque, filters.status, filters.chargeeDeDossier]);
 
   const handleUpdateStatus = (car: Car) => {
     setSelectedCar(car);
@@ -81,7 +102,8 @@ export const CarsList: React.FC = () => {
 
   const handleStatusUpdate = (
     carId: string,
-    newStatus: RepairStatus,
+    updatedData: Partial<Car>,
+    newStatus?: RepairStatus,
     notes?: string
   ) => {
     setCars((prevCars) =>
@@ -89,19 +111,10 @@ export const CarsList: React.FC = () => {
         car.id === carId
           ? {
               ...car,
-              currentStatus: newStatus,
+              ...updatedData,
+              currentStatus: newStatus || car.currentStatus,
               updatedAt: new Date().toISOString(),
               note: notes ?? car.note,
-              statusHistory: [
-                ...car.statusHistory,
-                {
-                  id: Date.now().toString(),
-                  status: newStatus,
-                  changedAt: new Date().toISOString(),
-                  changedBy: `${user?.name} ${user?.lastName}`,
-                  notes,
-                },
-              ],
             }
           : car
       )
@@ -415,7 +428,7 @@ export const CarsList: React.FC = () => {
                 Chargement...
               </div>
             ) : (
-              filteredCars.map((car, index) => (
+              paginatedCars.map((car, index) => (
                 <motion.div
                   key={car.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -491,7 +504,7 @@ export const CarsList: React.FC = () => {
                           </td>
                         </tr>
                       ) : (
-                        filteredCars.map((car, index) => (
+                        paginatedCars.map((car, index) => (
                           <motion.tr
                             key={car.id}
                             initial={{ opacity: 0, x: -20 }}
@@ -588,6 +601,72 @@ export const CarsList: React.FC = () => {
             Essayez de modifier vos critères de recherche
           </p>
         </motion.div>
+      )}
+
+      {/* Pagination Controls */}
+      {totalItems > 0 && (
+        <div className="flex items-center justify-between px-2 py-4">
+          <div className="text-sm text-muted-foreground">
+            Affichage de {Math.min(startIndex + 1, totalItems)} à {Math.min(startIndex + paginatedCars.length, totalItems)} sur {totalItems} véhicule{totalItems !== 1 ? 's' : ''}
+          </div>
+          <div className="flex items-center space-x-2">
+            <Select
+              value={itemsPerPage.toString()}
+              onValueChange={(value) => {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }}
+            >
+              <SelectTrigger className="h-8 w-[70px]">
+                <SelectValue placeholder={itemsPerPage} />
+              </SelectTrigger>
+              <SelectContent>
+                {[5, 10, 20, 50].map((size) => (
+                  <SelectItem key={size} value={size.toString()}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="flex items-center space-x-1">
+              <Button
+                variant="outline"
+                className="h-8 w-8 p-0"
+                onClick={() => handlePageChange(1)}
+                disabled={currentPage === 1}
+              >
+                <ChevronsLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                className="h-8 w-8 p-0"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <div className="flex items-center justify-center w-10 text-sm">
+                {currentPage}
+              </div>
+              <Button
+                variant="outline"
+                className="h-8 w-8 p-0"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                className="h-8 w-8 p-0"
+                onClick={() => handlePageChange(totalPages)}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronsRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
 
       <UpdateStatusModal
