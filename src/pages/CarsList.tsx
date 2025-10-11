@@ -18,6 +18,16 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { CarCard } from "@/components/cars/CarCard";
 import { UpdateStatusModal } from "@/components/cars/UpdateStatusModal";
 import {
@@ -44,6 +54,8 @@ export const CarsList: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("card");
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [carToDelete, setCarToDelete] = useState<Car | null>(null);
 
   const [filters, setFilters] = useState<CarFilters>({
     search: "",
@@ -123,17 +135,24 @@ export const CarsList: React.FC = () => {
 
 
 
-  const handleDelete = async (car: Car) => {
+  const handleDeleteClick = (car: Car) => {
+    setCarToDelete(car);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!carToDelete) return;
+    
     try {
       const { error } = await supabase
         .from('cars')
         .delete()
-        .eq('id', car.id);
+        .eq('id', carToDelete.id);
 
       if (error) throw error;
 
       // Update local state
-      setCars((prevCars) => prevCars.filter((c) => c.id !== car.id));
+      setCars((prevCars) => prevCars.filter((c) => c.id !== carToDelete.id));
       
       toast({
         title: "Succès",
@@ -147,6 +166,9 @@ export const CarsList: React.FC = () => {
         description: "Une erreur est survenue lors de la suppression du véhicule",
         variant: "destructive",
       });
+    } finally {
+      setDeleteDialogOpen(false);
+      setCarToDelete(null);
     }
   };
 
@@ -444,7 +466,7 @@ export const CarsList: React.FC = () => {
                     }
                     onDelete={
                       user?.role === "viewer"
-                        ? handleDelete
+                        ? handleDeleteClick
                         : undefined
                     }
                   />
@@ -602,6 +624,33 @@ export const CarsList: React.FC = () => {
           </p>
         </motion.div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer ce véhicule ? Cette action est irréversible.
+              {carToDelete && (
+                <div className="mt-2 p-3 bg-red-50 rounded-md">
+                  <p className="font-medium">{carToDelete.marque} {carToDelete.model}</p>
+                  <p className="text-sm text-muted-foreground">{carToDelete.matricule}</p>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Pagination Controls */}
       {totalItems > 0 && (
