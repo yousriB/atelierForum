@@ -12,16 +12,6 @@ const LayoutContent: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-background to-automotive-light flex flex-col">
       <Navbar />
       <div className="flex flex-1 relative pt-16"> {/* Add padding-top to account for navbar */}
-        {/* Mobile overlay */}
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-            onClick={close}
-          />
-        )}
         
         <div className="fixed top-16 left-0 bottom-0 z-30">
           <Sidebar />
