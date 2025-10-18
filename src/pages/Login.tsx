@@ -16,6 +16,9 @@ import showroomBg from "@/assets/showroom-bg.jpg";
 import icon from "@/assets/icon.png";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/lib/supabaseClient";
+// import bcrypt from "bcryptjs";
+import { User } from "@/types";
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -23,15 +26,20 @@ export const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { login } = useAuth();
+  const { setUser } = useAuth(); // Destructure setUser from useAuth
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const authenticatedUser = await login(email, password);
-      if (!authenticatedUser) {
+      const { data, error } = await supabase
+        .from("users_atelier")
+        .select("*")
+        .eq("email", email)
+        .single();
+
+      if (error || !data) {
         toast({
           title: "Erreur de connexion",
           description: "Email ou mot de passe incorrect",
@@ -39,6 +47,40 @@ export const Login: React.FC = () => {
         });
         setIsLoading(false);
         return;
+      }
+
+      // Plain-text password check
+      if (data.password !== password) {
+        toast({
+          title: "Erreur de connexion",
+          description: "Email ou mot de passe incorrect",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      const authenticatedUser = {
+        id: String(data.id ?? data.uuid ?? data.email),
+        email: data.email,
+        name: data.name ?? data.firstName ?? "",
+        lastName: data.lastName ?? "",
+        role: (data.role === "admin"
+          ? "admin"
+          : data.role === "reception"
+          ? "reception"
+          : "viewer") as User["role"],
+        password: data.password, // Keep the password for context if needed elsewhere, though not usually recommended
+      };
+
+      setUser(authenticatedUser);
+      try {
+        window.localStorage.setItem(
+          "auth:user",
+          JSON.stringify(authenticatedUser)
+        );
+      } catch (err) {
+        console.error("Error saving to local storage:", err);
       }
 
       if (authenticatedUser.role === "reception") {
@@ -50,7 +92,11 @@ export const Login: React.FC = () => {
       toast({
         title: "Connexion réussie",
         description: `Bienvenue ${
-          authenticatedUser.role === "reception" ? "Réception" : "Visualiseur"
+          authenticatedUser.role === "reception"
+            ? "Réception"
+            : authenticatedUser.role === "admin"
+            ? "Admin"
+            : "Visualiseur"
         }`,
       });
     } catch (err) {

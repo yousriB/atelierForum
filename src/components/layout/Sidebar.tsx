@@ -1,6 +1,14 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Plus, List, LogOut, Car, X } from "lucide-react";
+import {
+  LayoutDashboard,
+  Plus,
+  List,
+  LogOut,
+  Car,
+  X,
+  Users,
+} from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useSidebar } from "@/context/SidebarContext";
 import { Button } from "@/components/ui/button";
@@ -18,19 +26,25 @@ export const Sidebar: React.FC = () => {
       title: "Dashboard",
       icon: LayoutDashboard,
       href: "/dashboard",
-      roles: ["reception", "viewer"],
+      roles: ["admin", "reception", "viewer"],
     },
     {
       title: "Ajouter Voiture",
       icon: Plus,
       href: "/add-car",
-      roles: ["reception"],
+      roles: ["admin", "reception"],
     },
     {
       title: "Liste des Voitures",
       icon: List,
       href: "/cars",
-      roles: ["reception", "viewer"],
+      roles: ["admin", "reception", "viewer"],
+    },
+    {
+      title: "Utilisateurs",
+      icon: Users,
+      href: "/users",
+      roles: ["admin"],
     },
   ];
 
@@ -121,7 +135,6 @@ export const Sidebar: React.FC = () => {
           </Button>
         </div>
       </motion.aside>
-
     </>
   );
 };

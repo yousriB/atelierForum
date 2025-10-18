@@ -1,6 +1,11 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Car, RepairStatus, ViewMode, CarFilters } from "@/types";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -80,32 +85,47 @@ export const CarsList: React.FC = () => {
       const matchesStatus =
         filters.status === "" || car.currentStatus === filters.status;
       const matchesChargeeDeDossier =
-        filters.chargeeDeDossier === "" || 
-        (car.chargee_de_dossier && car.chargee_de_dossier.toLowerCase() === filters.chargeeDeDossier.toLowerCase());
+        filters.chargeeDeDossier === "" ||
+        (car.chargee_de_dossier &&
+          car.chargee_de_dossier.toLowerCase() ===
+            filters.chargeeDeDossier.toLowerCase());
 
-      return matchesSearch && matchesMarque && matchesStatus && matchesChargeeDeDossier;
+      return (
+        matchesSearch &&
+        matchesMarque &&
+        matchesStatus &&
+        matchesChargeeDeDossier
+      );
     });
   }, [cars, filters]);
-  
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(6);
-  
+
   // Calculate pagination
   const totalItems = filteredCars.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedCars = filteredCars.slice(startIndex, startIndex + itemsPerPage);
-  
+  const paginatedCars = filteredCars.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
+
   // Handle page change
   const handlePageChange = (page: number) => {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
   };
-  
+
   // Update current page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [filters.search, filters.marque, filters.status, filters.chargeeDeDossier]);
+  }, [
+    filters.search,
+    filters.marque,
+    filters.status,
+    filters.chargeeDeDossier,
+  ]);
 
   const handleUpdateStatus = (car: Car) => {
     setSelectedCar(car);
@@ -133,8 +153,6 @@ export const CarsList: React.FC = () => {
     );
   };
 
-
-
   const handleDeleteClick = (car: Car) => {
     setCarToDelete(car);
     setDeleteDialogOpen(true);
@@ -142,28 +160,29 @@ export const CarsList: React.FC = () => {
 
   const handleDelete = async () => {
     if (!carToDelete) return;
-    
+
     try {
       const { error } = await supabase
-        .from('cars')
+        .from("cars")
         .delete()
-        .eq('id', carToDelete.id);
+        .eq("id", carToDelete.id);
 
       if (error) throw error;
 
       // Update local state
       setCars((prevCars) => prevCars.filter((c) => c.id !== carToDelete.id));
-      
+
       toast({
         title: "Succès",
         description: "Le véhicule a été supprimé avec succès",
         variant: "default",
       });
     } catch (error) {
-      console.error('Error deleting car:', error);
+      console.error("Error deleting car:", error);
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de la suppression du véhicule",
+        description:
+          "Une erreur est survenue lors de la suppression du véhicule",
         variant: "destructive",
       });
     } finally {
@@ -460,12 +479,12 @@ export const CarsList: React.FC = () => {
                   <CarCard
                     car={car}
                     onUpdateStatus={
-                      user?.role === "reception"
+                      user?.role === "admin" || user?.role === "reception"
                         ? handleUpdateStatus
                         : undefined
                     }
                     onDelete={
-                      user?.role === "viewer"
+                      user?.role === "admin" || user?.role === "reception"
                         ? handleDeleteClick
                         : undefined
                     }
@@ -508,7 +527,8 @@ export const CarsList: React.FC = () => {
                         <th className="text-left p-3 sm:p-4 font-medium text-sm sm:text-base">
                           Arrivée
                         </th>
-                        {user?.role === "reception" && (
+                        {(user?.role === "admin" ||
+                          user?.role === "reception") && (
                           <th className="text-left p-3 sm:p-4 font-medium text-sm sm:text-base">
                             Actions
                           </th>
@@ -585,7 +605,8 @@ export const CarsList: React.FC = () => {
                                 {formatDate(car.dateArrivee)}
                               </span>
                             </td>
-                            {user?.role === "reception" && (
+                            {(user?.role === "admin" ||
+                              user?.role === "reception") && (
                               <td className="p-3 sm:p-4">
                                 <Button
                                   size="sm"
@@ -631,18 +652,23 @@ export const CarsList: React.FC = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
             <AlertDialogDescription>
-              Êtes-vous sûr de vouloir supprimer ce véhicule ? Cette action est irréversible.
+              Êtes-vous sûr de vouloir supprimer ce véhicule ? Cette action est
+              irréversible.
               {carToDelete && (
                 <div className="mt-2 p-3 bg-red-50 rounded-md">
-                  <p className="font-medium">{carToDelete.marque} {carToDelete.model}</p>
-                  <p className="text-sm text-muted-foreground">{carToDelete.matricule}</p>
+                  <p className="font-medium">
+                    {carToDelete.marque} {carToDelete.model}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {carToDelete.matricule}
+                  </p>
                 </div>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleDelete}
               className="bg-red-600 hover:bg-red-700"
             >
@@ -656,7 +682,9 @@ export const CarsList: React.FC = () => {
       {totalItems > 0 && (
         <div className="flex items-center justify-between px-2 py-4">
           <div className="text-sm text-muted-foreground">
-            Affichage de {Math.min(startIndex + 1, totalItems)} à {Math.min(startIndex + paginatedCars.length, totalItems)} sur {totalItems} véhicule{totalItems !== 1 ? 's' : ''}
+            Affichage de {Math.min(startIndex + 1, totalItems)} à{" "}
+            {Math.min(startIndex + paginatedCars.length, totalItems)} sur{" "}
+            {totalItems} véhicule{totalItems !== 1 ? "s" : ""}
           </div>
           <div className="flex items-center space-x-2">
             <Select
@@ -726,9 +754,12 @@ export const CarsList: React.FC = () => {
           setSelectedCar(null);
         }}
         onUpdate={handleStatusUpdate}
-        onDelete={user?.role === "viewer" ? handleDelete : undefined}
+        onDelete={
+          user?.role === "admin" || user?.role === "reception"
+            ? handleDelete
+            : undefined
+        }
       />
-
-      </div>
+    </div>
   );
 };

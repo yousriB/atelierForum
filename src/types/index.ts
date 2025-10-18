@@ -3,7 +3,8 @@ export interface User {
   email: string;
   name: string;
   lastName: string;
-  role: 'reception' | 'viewer';
+  password: string;
+  role: 'reception' | 'viewer' | 'admin';
 }
 
 export interface Car {

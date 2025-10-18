@@ -11,6 +11,7 @@ import {
   Shield,
   Settings,
   User,
+  Trash,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { calculateDaysInStatus, formatDate } from "@/utils/carHelpers";
@@ -22,7 +23,11 @@ interface CarCardProps {
   onDelete?: (car: Car) => void;
 }
 
-export const CarCard: React.FC<CarCardProps> = ({ car, onUpdateStatus , onDelete }) => {
+export const CarCard: React.FC<CarCardProps> = ({
+  car,
+  onUpdateStatus,
+  onDelete,
+}) => {
   const { user } = useAuth();
   const daysInStatus = calculateDaysInStatus(car);
 
@@ -125,27 +130,30 @@ export const CarCard: React.FC<CarCardProps> = ({ car, onUpdateStatus , onDelete
               </span>
             </div>
 
-            {user?.role === "reception" && onUpdateStatus && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => onUpdateStatus(car)}
-                className="hover:bg-automotive-blue hover:text-white transition-colors"
-              >
-                <Settings className="h-4 w-4 mr-1" />
-                Modifier Statut
-              </Button>
-            )}
-            {user?.role === "viewer" && onDelete && (
-              <Button
-                size="sm"
-                variant="destructive"
-                onClick={() => onDelete(car)}
-                className="transition-colors"
-              >
-                Supprimer
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {(user?.role === "admin" || user?.role === "reception") &&
+                onUpdateStatus && (
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    onClick={() => onUpdateStatus(car)}
+                    className="hover:bg-automotive-blue hover:text-white transition-colors"
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                )}
+
+              {(user?.role === "admin" || user?.role === "reception") &&
+                onDelete && (
+                  <Button
+                    size="icon"
+                    onClick={() => onDelete(car)}
+                    className="bg-red-500 text-white hover:bg-red-600"
+                  >
+                    <Trash className="h-4 w-4" />
+                  </Button>
+                )}
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -36,6 +36,7 @@ import { repairTypes } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useAuth } from "@/context/AuthContext";
 import {
   Select,
   SelectContent,
@@ -62,7 +63,7 @@ const carSchema = z.object({
     .min(1, "Sélectionnez au moins un type de réparation"),
   kilometrage: z.number().min(0, "Le kilométrage doit être positif"),
   dateArrivee: z.date({ required_error: "La date d'arrivée est requise" }),
-  chargeeDeDossier: z.enum(["Cyrine", "Marwa" , "Passager" , "Groscomptes"], {
+  chargeeDeDossier: z.enum(["Cyrine", "Marwa", "Passager", "Groscomptes"], {
     errorMap: () => ({
       message: "Veuillez sélectionner la chargée de dossier",
     }),
@@ -76,6 +77,7 @@ export const AddCar: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const form = useForm<CarFormData>({
     resolver: zodResolver(carSchema),
@@ -400,7 +402,9 @@ export const AddCar: React.FC = () => {
                               <SelectItem value="Passager">Passager</SelectItem>
                               <SelectItem value="Cyrine">Cyrine</SelectItem>
                               <SelectItem value="Marwa">Marwa</SelectItem>
-                              <SelectItem value="Groscomptes">Gros comptes</SelectItem>
+                              <SelectItem value="Groscomptes">
+                                Gros comptes
+                              </SelectItem>
                             </SelectContent>
                           </Select>
                         </FormControl>
@@ -422,7 +426,10 @@ export const AddCar: React.FC = () => {
                   </Button>
                   <Button
                     type="submit"
-                    disabled={isLoading}
+                    disabled={
+                      isLoading ||
+                      (user?.role !== "admin" && user?.role !== "reception")
+                    }
                     className="flex-1 order-1 sm:order-2 bg-gradient-to-r from-automotive-blue to-status-info hover:from-automotive-blue/90 hover:to-status-info/90"
                   >
                     {isLoading ? (

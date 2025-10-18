@@ -46,65 +46,45 @@ export const Dashboard: React.FC = () => {
   useEffect(() => {
     const fetchStats = async () => {
       setIsLoadingStats(true);
+      // Removed the supabase.rpc("get_dashboard_stats") call
       try {
-        const { data, error } = await supabase.rpc("get_dashboard_stats");
-        if (error) throw error;
-        const row = Array.isArray(data) ? data[0] : data;
-        if (row) {
-          setTotalCars(
-            Number(row?.total_cars ?? 0) - Number(row?.sortie_cars ?? 0)
-          );
-          setReadyCars(Number(row?.ready_cars ?? 0));
-          setInProgressCars(Number(row?.in_progress_cars ?? 0));
-          setPendingCars(Number(row?.pending_cars ?? 0));
-        } else {
-          throw new Error("Empty stats result");
-        }
+        const { data: carsData, error: carsError } = await supabase
+          .from("cars")
+          .select("*");
+        if (carsError) throw carsError;
+        const list = (carsData || []).filter(
+          (r: any) => r.etat_devis !== "Sortie"
+        );
+
+        const getStatus = (row: any): string =>
+          row.etat_devis || row.etat || row.status || row.current_status || "";
+
+        const total = list.length;
+        const ready = list.filter((r: any) => getStatus(r) === "Prêt").length;
+        const inProgressSet = new Set([
+          "Au cours de réparation mécanique",
+          "Au cours de réparation tôlerie",
+          "Au cours de réparation électrique",
+        ]);
+        const inProgress = list.filter((r: any) =>
+          inProgressSet.has(getStatus(r))
+        ).length;
+        const pending = list.filter(
+          (r: any) =>
+            getStatus(r) !== "Prêt" && !inProgressSet.has(getStatus(r))
+        ).length;
+
+        setTotalCars(total);
+        setReadyCars(ready);
+        setPendingCars(pending);
+        setInProgressCars(inProgress);
       } catch (err) {
-        // Fallback: compute stats client-side excluding 'Sortie'
-        try {
-          const { data: carsData, error: carsError } = await supabase
-            .from("cars")
-            .select("*");
-          if (carsError) throw carsError;
-          const list = (carsData || []).filter(
-            (r: any) => r.etat_devis !== "Sortie"
-          );
-
-          const getStatus = (row: any): string =>
-            row.etat_devis ||
-            row.etat ||
-            row.status ||
-            row.current_status ||
-            "";
-
-          const total = list.length;
-          const ready = list.filter((r: any) => getStatus(r) === "Prêt").length;
-          const inProgressSet = new Set([
-            "Au cours de réparation mécanique",
-            "Au cours de réparation tôlerie",
-            "Au cours de réparation électrique",
-          ]);
-          const inProgress = list.filter((r: any) =>
-            inProgressSet.has(getStatus(r))
-          ).length;
-          const pending = list.filter(
-            (r: any) =>
-              getStatus(r) !== "Prêt" && !inProgressSet.has(getStatus(r))
-          ).length;
-
-          setTotalCars(total);
-          setReadyCars(ready);
-          setPendingCars(pending);
-          setInProgressCars(inProgress);
-        } catch (fallbackErr) {
-          console.error(fallbackErr);
-          toast({
-            title: "Erreur",
-            description: "Impossible de charger les statistiques",
-            variant: "destructive",
-          });
-        }
+        console.error(err);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les statistiques",
+          variant: "destructive",
+        });
       } finally {
         setIsLoadingStats(false);
       }
@@ -254,12 +234,12 @@ export const Dashboard: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {/* <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Nom complet:</span>
                   <span className="text-sm text-muted-foreground">
                     {user?.name} {user?.lastName}
                   </span>
-                </div> */}
+                </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Email:</span>
                   <span className="text-sm text-muted-foreground">
@@ -273,7 +253,7 @@ export const Dashboard: React.FC = () => {
                       user?.role === "reception" ? "default" : "secondary"
                     }
                   >
-                    {user?.role === "reception" ? "Réception" : "Visualiseur"}
+                    {user?.role}
                   </Badge>
                 </div>
                 <div className="pt-2 border-t">

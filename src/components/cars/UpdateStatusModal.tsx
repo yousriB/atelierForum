@@ -46,9 +46,15 @@ import {
 } from "@/components/ui/popover";
 
 const carSchema = z.object({
-  clientName: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
-  clientLastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
-  matricule: z.string().min(5, "La matricule doit contenir au moins 5 caractères"),
+  clientName: z
+    .string()
+    .min(2, "Le prénom doit contenir au moins 2 caractères"),
+  clientLastName: z
+    .string()
+    .min(2, "Le nom doit contenir au moins 2 caractères"),
+  matricule: z
+    .string()
+    .min(5, "La matricule doit contenir au moins 5 caractères"),
   model: z.string().min(2, "Le modèle est requis"),
   marque: z.string().min(1, "La marque est requise"),
   assuranceCompany: z.string().min(1, "La compagnie d'assurance est requise"),
@@ -70,7 +76,12 @@ interface UpdateStatusModalProps {
   isOpen: boolean;
   onClose: () => void;
   car: Car | null;
-  onUpdate: (carId: string, updatedData: Partial<Car>, newStatus?: string, notes?: string) => void;
+  onUpdate: (
+    carId: string,
+    updatedData: Partial<Car>,
+    newStatus?: string,
+    notes?: string
+  ) => void;
   onDelete?: (car: Car) => void;
 }
 
@@ -104,7 +115,9 @@ export const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
         model: car.model,
         marque: car.marque,
         assuranceCompany: car.assuranceCompany,
-        typeReparation: Array.isArray(car.typeReparation) ? car.typeReparation : [],
+        typeReparation: Array.isArray(car.typeReparation)
+          ? car.typeReparation
+          : [],
         kilometrage: car.kilometrage,
         dateArrivee: car.dateArrivee ? new Date(car.dateArrivee) : new Date(),
         currentStatus: car.currentStatus,
@@ -152,14 +165,16 @@ export const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
       onUpdate(car.id, updatedData, data.currentStatus);
       toast({
         title: "Succès",
-        description: "Les informations du véhicule ont été mises à jour avec succès",
+        description:
+          "Les informations du véhicule ont été mises à jour avec succès",
       });
       onClose();
     } catch (error) {
       console.error("Error updating car:", error);
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de la mise à jour du véhicule",
+        description:
+          "Une erreur est survenue lors de la mise à jour du véhicule",
         variant: "destructive",
       });
     }
@@ -173,7 +188,8 @@ export const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
         <DialogHeader>
           <DialogTitle>Mettre à jour le véhicule</DialogTitle>
           <DialogDescription>
-            Mettez à jour les détails pour {car.marque} {car.model} ({car.matricule})
+            Mettez à jour les détails pour {car.marque} {car.model} (
+            {car.matricule})
           </DialogDescription>
         </DialogHeader>
 
@@ -183,7 +199,7 @@ export const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
               {/* Client Information */}
               <div className="space-y-4">
                 <h3 className="font-medium">Informations Client</h3>
-                
+
                 <FormField
                   control={form.control}
                   name="clientName"
@@ -216,7 +232,7 @@ export const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
               {/* Car Information */}
               <div className="space-y-4">
                 <h3 className="font-medium">Informations Véhicule</h3>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -272,7 +288,9 @@ export const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
                           type="number"
                           placeholder="85000"
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -284,7 +302,7 @@ export const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
               {/* Repair Information */}
               <div className="space-y-4">
                 <h3 className="font-medium">Informations Réparation</h3>
-                
+
                 <FormField
                   control={form.control}
                   name="typeReparation"
@@ -305,7 +323,9 @@ export const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
                                     <Checkbox
                                       checked={checked}
                                       onCheckedChange={(isChecked) => {
-                                        const next = new Set<string>(field.value || []);
+                                        const next = new Set<string>(
+                                          field.value || []
+                                        );
                                         if (isChecked) next.add(type);
                                         else next.delete(type);
                                         field.onChange(Array.from(next));
@@ -399,7 +419,9 @@ export const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
                             <SelectItem value="Passager">Passager</SelectItem>
                             <SelectItem value="Cyrine">Cyrine</SelectItem>
                             <SelectItem value="Marwa">Marwa</SelectItem>
-                            <SelectItem value="Groscomptes">Gros comptes</SelectItem>
+                            <SelectItem value="Groscomptes">
+                              Gros comptes
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       </FormControl>
@@ -412,7 +434,7 @@ export const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
               {/* Status Information */}
               <div className="space-y-4">
                 <h3 className="font-medium">Statut</h3>
-                
+
                 <FormField
                   control={form.control}
                   name="currentStatus"
@@ -490,9 +512,12 @@ export const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
               >
                 Annuler
               </Button>
-              <Button 
-                type="submit" 
-                disabled={form.formState.isSubmitting}
+              <Button
+                type="submit"
+                disabled={
+                  form.formState.isSubmitting ||
+                  (user?.role !== "admin" && user?.role !== "reception")
+                }
                 className="bg-gradient-to-r from-automotive-blue to-status-info hover:from-automotive-blue/90 hover:to-status-info/90"
               >
                 {form.formState.isSubmitting ? (

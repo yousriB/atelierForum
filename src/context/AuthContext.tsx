@@ -1,12 +1,14 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { User } from "@/types";
 import { supabase } from "@/lib/supabaseClient";
+// import bcrypt from "bcryptjs";
 
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<User | null>;
   logout: () => void;
   isAuthenticated: boolean;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>; // Add setUser here
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -42,7 +44,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   ): Promise<User | null> => {
     // Fetch user by email from Supabase and validate password
     const { data, error } = await supabase
-      .from("users")
+      .from("users_atelier")
       .select("*")
       .eq("email", email)
       .single();
@@ -61,7 +63,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       email: data.email,
       name: data.name ?? data.firstName ?? "",
       lastName: data.lastName ?? "",
-      role: data.role === "reception" ? "reception" : "viewer",
+      role:
+        data.role === "admin"
+          ? "admin"
+          : data.role === "reception"
+          ? "reception"
+          : "viewer",
+      password: data.password,
     };
 
     setUser(authenticatedUser);
@@ -84,7 +92,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated }}>
+    <AuthContext.Provider
+      value={{ user, login, logout, isAuthenticated, setUser }}
+    >
       {children}
     </AuthContext.Provider>
   );
