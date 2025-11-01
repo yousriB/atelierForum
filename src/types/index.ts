@@ -35,7 +35,7 @@ export interface StatusChange {
 }
 
 export type RepairStatus = 
-  | 'En cours de montage'
+  | 'En cours de démontage'
   | 'En Attente de devis'
   | 'Attente accord de devis'
   | 'Devis accordé'
