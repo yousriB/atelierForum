@@ -100,13 +100,15 @@ export const AddCar: React.FC = () => {
         model: data.model,
         marque: data.marque,
         assurance_company: data.assuranceCompany,
-        type_reparation: data.typeReparation,
+        type_reparation: Array.isArray(data.typeReparation)
+          ? data.typeReparation
+          : [],
         kilometrage: data.kilometrage,
         date_arrivee: data.dateArrivee.toISOString(),
         chargee_de_dossier: data.chargeeDeDossier,
         etat_devis: "En Attente de devis",
         etat_updated_at: new Date().toISOString(),
-        note: data.note || null,
+        note: data.note,
       });
 
       if (error) throw error;
@@ -115,6 +117,7 @@ export const AddCar: React.FC = () => {
         title: "Véhicule ajouté avec succès",
         description: `${data.marque} ${data.model} - ${data.matricule}`,
       });
+      form.reset();
 
       navigate("/cars");
     } catch (error) {
@@ -333,16 +336,22 @@ export const AddCar: React.FC = () => {
                               control={form.control}
                               name="typeReparation"
                               render={({ field }) => {
-                                const checked = field.value?.includes(type);
+                                // Ensure field.value is always an array
+                                const checked = (field.value ?? []).includes(
+                                  type
+                                );
                                 return (
                                   <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                                     <FormControl>
                                       <Checkbox
                                         checked={!!checked}
                                         onCheckedChange={(isChecked) => {
-                                          const next = new Set<string>(
-                                            field.value ?? []
-                                          );
+                                          const current = Array.isArray(
+                                            field.value
+                                          )
+                                            ? field.value
+                                            : [];
+                                          const next = new Set<string>(current);
                                           if (isChecked === true)
                                             next.add(type);
                                           else next.delete(type);
@@ -375,7 +384,8 @@ export const AddCar: React.FC = () => {
                           <Textarea
                             placeholder="Ajouter des informations complémentaires..."
                             rows={3}
-                            {...field}
+                            value={field.value ?? ""}
+                            onChange={field.onChange}
                           />
                         </FormControl>
                         <FormMessage />
