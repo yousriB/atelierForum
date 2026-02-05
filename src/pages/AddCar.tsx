@@ -35,7 +35,7 @@ import { motion } from "framer-motion";
 import { repairTypes } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { Checkbox } from "@/components/ui/checkbox";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { useAuth } from "@/context/AuthContext";
 import {
   Select,
@@ -323,55 +323,27 @@ export const AddCar: React.FC = () => {
                   />
 
                   {/* Type de Réparation */}
-                  <FormField
-                    control={form.control}
-                    name="typeReparation"
-                    render={() => (
-                      <FormItem>
-                        <FormLabel>Type de Réparation</FormLabel>
-                        <div className="space-y-2">
-                          {repairTypes.map((type) => (
-                            <FormField
-                              key={type}
-                              control={form.control}
-                              name="typeReparation"
-                              render={({ field }) => {
-                                // Ensure field.value is always an array
-                                const checked = (field.value ?? []).includes(
-                                  type
-                                );
-                                return (
-                                  <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <Checkbox
-                                        checked={!!checked}
-                                        onCheckedChange={(isChecked) => {
-                                          const current = Array.isArray(
-                                            field.value
-                                          )
-                                            ? field.value
-                                            : [];
-                                          const next = new Set<string>(current);
-                                          if (isChecked === true)
-                                            next.add(type);
-                                          else next.delete(type);
-                                          field.onChange(Array.from(next));
-                                        }}
-                                      />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      {type}
-                                    </FormLabel>
-                                  </FormItem>
-                                );
-                              }}
+                    <FormField
+                      control={form.control}
+                      name="typeReparation"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Type de Réparation</FormLabel>
+                          <FormControl>
+                            <MultiSelect
+                              options={repairTypes.map((type) => ({
+                                label: type,
+                                value: type,
+                              }))}
+                              selected={field.value}
+                              onChange={field.onChange}
+                              placeholder="Sélectionner les types de réparation..."
                             />
-                          ))}
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
                   {/* Note (optionnel) */}
                   <FormField

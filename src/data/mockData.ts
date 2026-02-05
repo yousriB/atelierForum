@@ -37,6 +37,7 @@ export const repairTypes = [
 export const repairStatuses: RepairStatus[] = [
   'En cours de démontage',
   'En Attente de devis',
+  'En Attente pièce Hors atelier',
   'Attente accord de devis',
   'Devis accordé',
   'Attente pièce',

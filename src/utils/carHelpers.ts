@@ -31,6 +31,7 @@ export const getStatusBadgeVariant = (status: RepairStatus): 'default' | 'second
     case 'Attente accord de devis':
     case 'Attente pièce':
     case 'Pièce non dispo':
+    case 'En Attente pièce Hors atelier':
       return 'destructive';
     default:
       return 'secondary';
