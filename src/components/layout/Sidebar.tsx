@@ -8,6 +8,7 @@ import {
   Car,
   X,
   Users,
+  CalendarDays,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useSidebar } from "@/context/SidebarContext";
@@ -39,6 +40,12 @@ export const Sidebar: React.FC = () => {
       icon: List,
       href: "/cars",
       roles: ["admin", "reception", "viewer"],
+    },
+    {
+      title: "Rendez-vous",
+      icon: CalendarDays,
+      href: "/appointments",
+      roles: ["admin", "reception"],
     },
     {
       title: "Utilisateurs",

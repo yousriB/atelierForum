@@ -11,6 +11,7 @@ import { AddCar } from "@/pages/AddCar";
 import { CarsList } from "@/pages/CarsList";
 import NotFound from "./pages/NotFound";
 import { UsersPage } from "./pages/UsersPage";
+import Appointments from "@/pages/Appointments";
 
 const queryClient = new QueryClient();
 
@@ -78,6 +79,14 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute requireRoles={["admin"]}>
               <UsersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="appointments"
+          element={
+            <ProtectedRoute requireRoles={["admin", "reception"]}>
+              <Appointments />
             </ProtectedRoute>
           }
         />
