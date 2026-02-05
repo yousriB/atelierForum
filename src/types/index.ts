@@ -8,6 +8,7 @@ export interface User {
 }
 
 export interface Car {
+  client_phone: string;
   id: string;
   clientName: string;
   clientLastName: string;
@@ -20,6 +21,7 @@ export interface Car {
   dateArrivee: string;
   currentStatus: RepairStatus;
   chargee_de_dossier?: string;
+  client_phone?: string;
   note?: string;
   statusHistory: StatusChange[];
   createdAt: string;

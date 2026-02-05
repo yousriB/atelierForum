@@ -8,6 +8,7 @@ import {
   Car as CarIcon,
   Calendar,
   Gauge,
+  Phone,
   Shield,
   Settings,
   User,
@@ -114,6 +115,18 @@ export const CarCard: React.FC<CarCardProps> = ({
                 </p>
               </div>
             </div>
+
+            {car.client_phone && (
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-sm font-medium text-automotive-dark">
+                    {car.client_phone}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Téléphone</p>
+                </div>
+              </div>
+            )}
           </div>
 
           {car.note && (

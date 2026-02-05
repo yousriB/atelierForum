@@ -88,7 +88,7 @@ export const CarsList: React.FC = () => {
         filters.chargeeDeDossier === "" ||
         (car.chargee_de_dossier &&
           car.chargee_de_dossier.toLowerCase() ===
-            filters.chargeeDeDossier.toLowerCase());
+          filters.chargeeDeDossier.toLowerCase());
 
       return (
         matchesSearch &&
@@ -142,12 +142,12 @@ export const CarsList: React.FC = () => {
       prevCars.map((car) =>
         car.id === carId
           ? {
-              ...car,
-              ...updatedData,
-              currentStatus: newStatus || car.currentStatus,
-              updatedAt: new Date().toISOString(),
-              note: notes ?? car.note,
-            }
+            ...car,
+            ...updatedData,
+            currentStatus: newStatus || car.currentStatus,
+            updatedAt: new Date().toISOString(),
+            note: notes ?? car.note,
+          }
           : car
       )
     );
@@ -201,6 +201,7 @@ export const CarsList: React.FC = () => {
       Modèle: c.model,
       Matricule: c.matricule,
       Client: `${c.clientName} ${c.clientLastName}`.trim(),
+      "Téléphone du Client": c.client_phone ?? "",
       Assurance: c.assuranceCompany,
       "Type de réparation": c.typeReparation,
       Statut: c.currentStatus,
@@ -215,6 +216,7 @@ export const CarsList: React.FC = () => {
         Modèle: "",
         Matricule: "",
         Client: "",
+        "Téléphone du Client": "",
         Assurance: "",
         "Type de réparation": "",
         Statut: "",
@@ -285,6 +287,7 @@ export const CarsList: React.FC = () => {
             marque: row.marque,
             note: row.note ?? undefined,
             chargee_de_dossier: row.chargee_de_dossier,
+            client_phone: row.client_phone ?? undefined,
             assuranceCompany: row.assurance_company,
             typeReparation: Array.isArray(row.type_reparation)
               ? (row.type_reparation as string[]).join(", ")
@@ -513,6 +516,9 @@ export const CarsList: React.FC = () => {
                           Client
                         </th>
                         <th className="text-left p-3 sm:p-4 font-medium text-sm sm:text-base">
+                          Téléphone
+                        </th>
+                        <th className="text-left p-3 sm:p-4 font-medium text-sm sm:text-base">
                           Matricule
                         </th>
                         <th className="text-left p-3 sm:p-4 font-medium text-sm sm:text-base">
@@ -529,17 +535,17 @@ export const CarsList: React.FC = () => {
                         </th>
                         {(user?.role === "admin" ||
                           user?.role === "reception") && (
-                          <th className="text-left p-3 sm:p-4 font-medium text-sm sm:text-base">
-                            Actions
-                          </th>
-                        )}
+                            <th className="text-left p-3 sm:p-4 font-medium text-sm sm:text-base">
+                              Actions
+                            </th>
+                          )}
                       </tr>
                     </thead>
                     <tbody>
                       {isLoading && filteredCars.length === 0 ? (
                         <tr>
                           <td
-                            colSpan={user?.role === "reception" ? 8 : 7}
+                            colSpan={user?.role === "reception" ? 9 : 8}
                             className="p-6 text-center text-muted-foreground"
                           >
                             Chargement...
@@ -575,6 +581,11 @@ export const CarsList: React.FC = () => {
                               </div>
                             </td>
                             <td className="p-3 sm:p-4">
+                              <span className="text-xs sm:text-sm">
+                                {car.client_phone ?? "—"}
+                              </span>
+                            </td>
+                            <td className="p-3 sm:p-4">
                               <code className="bg-automotive-light/50 px-2 py-1 rounded text-xs sm:text-sm font-mono">
                                 {car.matricule}
                               </code>
@@ -607,17 +618,17 @@ export const CarsList: React.FC = () => {
                             </td>
                             {(user?.role === "admin" ||
                               user?.role === "reception") && (
-                              <td className="p-3 sm:p-4">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleUpdateStatus(car)}
-                                  className="text-xs"
-                                >
-                                  Modifier
-                                </Button>
-                              </td>
-                            )}
+                                <td className="p-3 sm:p-4">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleUpdateStatus(car)}
+                                    className="text-xs"
+                                  >
+                                    Modifier
+                                  </Button>
+                                </td>
+                              )}
                           </motion.tr>
                         ))
                       )}

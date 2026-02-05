@@ -52,6 +52,7 @@ const carSchema = z.object({
   clientLastName: z
     .string()
     .min(2, "Le nom doit contenir au moins 2 caractères"),
+  clientPhone: z.string().optional(),
   matricule: z
     .string()
     .min(5, "La matricule doit contenir au moins 5 caractères"),
@@ -111,6 +112,7 @@ export const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
       form.reset({
         clientName: car.clientName,
         clientLastName: car.clientLastName,
+        clientPhone: car.client_phone || "",
         matricule: car.matricule,
         model: car.model,
         marque: car.marque,
@@ -135,6 +137,7 @@ export const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
       const updateData = {
         client_name: data.clientName,
         client_lastname: data.clientLastName,
+        client_phone: data.clientPhone || null,
         matricule: data.matricule,
         model: data.model,
         marque: data.marque,
@@ -222,6 +225,20 @@ export const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
                       <FormLabel>Nom du Client</FormLabel>
                       <FormControl>
                         <Input placeholder="Dupont" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="clientPhone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Téléphone du Client</FormLabel>
+                      <FormControl>
+                        <Input placeholder="+216 xx xx xx xx" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
