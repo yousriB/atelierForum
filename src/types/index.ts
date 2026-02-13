@@ -8,7 +8,7 @@ export interface User {
 }
 
 export interface Car {
-  client_phone: string;
+  // client_phone: string;
   id: string;
   clientName: string;
   clientLastName: string;
@@ -39,7 +39,7 @@ export interface StatusChange {
 export type RepairStatus = 
   | 'En cours de démontage'
   | 'En Attente de devis'
-  | 'En Attente pièce Hors atelier'
+  | 'Hors atelier'
   | 'Attente accord de devis'
   | 'Devis accordé'
   | 'Attente pièce'
