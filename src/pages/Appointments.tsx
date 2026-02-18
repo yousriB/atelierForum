@@ -30,7 +30,7 @@ import {
   MessageCircle,
   CheckCircle,
   XCircle,
-
+  Trash2,
 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -134,6 +134,33 @@ export default function Appointments() {
       if (error) {
         console.error("Error updating appointment status:", error);
         setError("Failed to update appointment status");
+      } else {
+        await fetchAppointments();
+        setIsAppointmentDetailsDialogOpen(false);
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      setError("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteAppointment = async (appointmentId: string) => {
+    if (!confirm("Are you sure you want to delete this appointment? This action cannot be undone.")) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const { error } = await supabase
+        .from("appointment_requests")
+        .delete()
+        .eq("id", appointmentId);
+
+      if (error) {
+        console.error("Error deleting appointment:", error);
+        setError("Failed to delete appointment");
       } else {
         await fetchAppointments();
         setIsAppointmentDetailsDialogOpen(false);
@@ -354,6 +381,14 @@ export default function Appointments() {
                         >
                           {appointment.status}
                         </Badge>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => deleteAppointment(appointment.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                     {appointment.message && (
