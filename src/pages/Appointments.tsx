@@ -31,7 +31,11 @@ import {
   CheckCircle,
   XCircle,
   Trash2,
+  Plus,
 } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/lib/supabaseClient";
 
 interface AppointmentRequest {
@@ -77,6 +81,28 @@ export default function Appointments() {
 
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newAppt, setNewAppt] = useState<Partial<AppointmentRequest>>({
+    name: "",
+    email: "",
+    phone: "",
+    car_brand: "",
+    car_model: "",
+    car_year: "",
+    car_chassis: "",
+    service_types: [],
+    message: "",
+    status: "pending",
+  });
+
+  const serviceOptions = [
+    "Entretien régulier",
+    "Réparation électrique",
+    "Charge climatiseur",
+    "Réparation mécanique",
+    "Diagnostic",
+    "Réparation tôlerie",
+  ];
 
   const fetchAppointments = async () => {
     try {
@@ -222,6 +248,46 @@ export default function Appointments() {
     }
   };
 
+  const handleCreateAppointment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAppt.name || !newAppt.email || !newAppt.appointment_date || !newAppt.appointment_time) {
+      alert("Please fill in all required fields (Name, Email, Date, Time).");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const { error } = await supabase
+        .from("appointment_requests")
+        .insert([newAppt]);
+
+      if (error) {
+        console.error("Error creating appointment:", error);
+        setError("Failed to create appointment");
+      } else {
+        await fetchAppointments();
+        setIsCreateModalOpen(false);
+        setNewAppt({
+          name: "",
+          email: "",
+          phone: "",
+          car_brand: "",
+          car_model: "",
+          car_year: "",
+          car_chassis: "",
+          service_types: [],
+          message: "",
+          status: "pending",
+        });
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      setError("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const ymd = (d: Date) => {
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -255,13 +321,22 @@ export default function Appointments() {
       <div className="space-y-6 p-4 md:p-6 lg:p-8">
         {/* Header */}
         <header className="flex flex-col items-start gap-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-              Appointment Requests
-            </h1>
-            <p className="text-sm md:text-base text-muted-foreground mt-1">
-              Manage customer appointments and schedule new visits
-            </p>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full gap-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+                Appointment Requests
+              </h1>
+              <p className="text-sm md:text-base text-muted-foreground mt-1">
+                Manage customer appointments and schedule new visits
+              </p>
+            </div>
+            <Button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="w-full sm:w-auto bg-red-500 text-white hover:bg-red-500/90"
+
+            >
+              <Plus className="mr-2 h-4 w-4 " /> Add Appointment
+            </Button>
           </div>
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 w-full">
@@ -529,7 +604,7 @@ export default function Appointments() {
                               <div className="flex flex-wrap gap-2 justify-end">
                                 {selectedAppointment.status === "pending" && (
                                   <Button
-                                    className="w-full sm:w-auto"
+                                    className="w-full sm:w-auto "
                                     onClick={() => {
                                       updateAppointmentStatus(
                                         selectedAppointment.id,
@@ -685,6 +760,168 @@ export default function Appointments() {
               {loading ? "Saving..." : "Save Changes"}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Appointment Modal */}
+      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">Create Appointment</DialogTitle>
+            <DialogDescription>
+              Enter the appointment details manually for the customer.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleCreateAppointment} className="space-y-6 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Customer Info */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-primary border-b pb-2">Customer Information</h3>
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Full Name *</Label>
+                  <Input
+                    id="name"
+                    placeholder="Customer Name"
+                    required
+                    value={newAppt.name}
+                    onChange={(e) => setNewAppt({ ...newAppt, name: e.target.value })}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="email@example.com"
+                    required
+                    value={newAppt.email}
+                    onChange={(e) => setNewAppt({ ...newAppt, email: e.target.value })}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input
+                    id="phone"
+                    placeholder="+1234567890"
+                    value={newAppt.phone || ''}
+                    onChange={(e) => setNewAppt({ ...newAppt, phone: e.target.value })}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="date">Date *</Label>
+                    <Input
+                      id="date"
+                      type="date"
+                      required
+                      value={newAppt.appointment_date || ''}
+                      onChange={(e) => setNewAppt({ ...newAppt, appointment_date: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="time">Time *</Label>
+                    <Input
+                      id="time"
+                      type="time"
+                      required
+                      value={newAppt.appointment_time || ''}
+                      onChange={(e) => setNewAppt({ ...newAppt, appointment_time: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Vehicle Info */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-primary border-b pb-2">Vehicle Information</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="brand">Brand</Label>
+                    <Input
+                      id="brand"
+                      placeholder="e.g. BMW"
+                      value={newAppt.car_brand || ''}
+                      onChange={(e) => setNewAppt({ ...newAppt, car_brand: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="model">Model</Label>
+                    <Input
+                      id="model"
+                      placeholder="e.g. X5"
+                      value={newAppt.car_model || ''}
+                      onChange={(e) => setNewAppt({ ...newAppt, car_model: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="year">Year</Label>
+                    <Input
+                      id="year"
+                      placeholder="e.g. 2024"
+                      value={newAppt.car_year || ''}
+                      onChange={(e) => setNewAppt({ ...newAppt, car_year: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="chassis">Chassis #</Label>
+                    <Input
+                      id="chassis"
+                      placeholder="VIN Number"
+                      value={newAppt.car_chassis || ''}
+                      onChange={(e) => setNewAppt({ ...newAppt, car_chassis: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="grid gap-2">
+                  <Label>Service Types</Label>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {serviceOptions.map((service) => (
+                      <div key={service} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`service-${service}`}
+                          checked={newAppt.service_types?.includes(service)}
+                          onCheckedChange={(checked) => {
+                            const updatedServices = checked
+                              ? [...(newAppt.service_types || []), service]
+                              : (newAppt.service_types || []).filter(s => s !== service);
+                            setNewAppt({ ...newAppt, service_types: updatedServices });
+                          }}
+                        />
+                        <label
+                          htmlFor={`service-${service}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {service}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="message">Note / Message</Label>
+              <Textarea
+                id="message"
+                placeholder="Any special instructions or notes..."
+                className="min-h-[100px]"
+                value={newAppt.message || ''}
+                onChange={(e) => setNewAppt({ ...newAppt, message: e.target.value })}
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={loading} className="bg-red-500 text-white hover:bg-red-500/90">
+                {loading ? "Creating..." : "Create Appointment"}
+              </Button>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

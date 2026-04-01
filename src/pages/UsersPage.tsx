@@ -201,7 +201,7 @@ export const UsersPage: React.FC = () => {
           onOpenChange={setIsAddUserDialogOpen}
         >
           <DialogTrigger asChild>
-            <Button className="bg-automotive-blue hover:bg-automotive-blue/90">
+            <Button className="bg-red-500 text-white hover:bg-red-500/90">
               <PlusCircle className="mr-2 h-4 w-4" /> Ajouter Utilisateur
             </Button>
           </DialogTrigger>
@@ -290,7 +290,7 @@ export const UsersPage: React.FC = () => {
               </div>
             </div>
             <DialogFooter>
-              <Button onClick={handleAddUser} disabled={loading}>
+              <Button onClick={handleAddUser} disabled={loading} className="bg-red-500 text-white hover:bg-red-500/90">
                 {loading ? "Ajout en cours..." : "Ajouter"}
               </Button>
             </DialogFooter>
@@ -435,6 +435,7 @@ export const UsersPage: React.FC = () => {
                             <Button
                               onClick={handleUpdateUser}
                               disabled={loading}
+                              className="bg-red-500 text-white hover:bg-red-500/90"
                             >
                               {loading ? "Mise à jour..." : "Mettre à jour"}
                             </Button>

@@ -340,27 +340,27 @@ export const AddCar: React.FC = () => {
                   />
 
                   {/* Type de Réparation */}
-                    <FormField
-                      control={form.control}
-                      name="typeReparation"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Type de Réparation</FormLabel>
-                          <FormControl>
-                            <MultiSelect
-                              options={repairTypes.map((type) => ({
-                                label: type,
-                                value: type,
-                              }))}
-                              selected={field.value}
-                              onChange={field.onChange}
-                              placeholder="Sélectionner les types de réparation..."
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  <FormField
+                    control={form.control}
+                    name="typeReparation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Type de Réparation</FormLabel>
+                        <FormControl>
+                          <MultiSelect
+                            options={repairTypes.map((type) => ({
+                              label: type,
+                              value: type,
+                            }))}
+                            selected={field.value}
+                            onChange={field.onChange}
+                            placeholder="Sélectionner les types de réparation..."
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   {/* Note (optionnel) */}
                   <FormField
@@ -429,7 +429,7 @@ export const AddCar: React.FC = () => {
                       isLoading ||
                       (user?.role !== "admin" && user?.role !== "reception")
                     }
-                    className="flex-1 order-1 sm:order-2 bg-gradient-to-r from-automotive-blue to-status-info hover:from-automotive-blue/90 hover:to-status-info/90"
+                    className="flex-1 order-1 sm:order-2 bg-red-500 text-white hover:bg-red-500/90"
                   >
                     {isLoading ? (
                       "Enregistrement..."
