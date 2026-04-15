@@ -3,7 +3,7 @@ export interface User {
   email: string;
   name: string;
   lastName: string;
-  password: string;
+  password?: string; // no longer stored after Supabase Auth migration
   role: 'reception' | 'viewer' | 'admin';
 }
 

@@ -71,7 +71,7 @@ export const Navbar: React.FC = () => {
                 {user.email}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={logout} className="text-destructive">
+              <DropdownMenuItem onClick={() => logout()} className="text-destructive">
                 <LogOut className="mr-2 h-4 w-4" />
                 Se déconnecter
               </DropdownMenuItem>

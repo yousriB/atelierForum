@@ -10,79 +10,101 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Car, Mail, Lock, AlertCircle } from "lucide-react";
+import { Mail, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 import showroomBg from "@/assets/showroom-bg.jpg";
 import icon from "@/assets/icon.png";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
-// import bcrypt from "bcryptjs";
+import { logSecurityEvent } from "@/lib/security-logger";
 import { User } from "@/types";
 
 export const Login: React.FC = () => {
-  const [email, setEmail] = useState("");
+  const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const { setUser } = useAuth(); // Destructure setUser from useAuth
+
+  const navigate    = useNavigate();
+  const { toast }   = useToast();
+  const { setUser } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase
+      // ── 1. Authenticate via Supabase Auth ──────────────────────────────────
+      const { data: authData, error: authError } =
+        await supabase.auth.signInWithPassword({ email, password });
+
+      if (authError || !authData.user) {
+        await logSecurityEvent({
+          event_type:  "login_attempt",
+          severity:    "medium",
+          status_code: 401,
+          endpoint:    "/auth/login",
+          method:      "POST",
+          metadata:    { email, error: authError?.message ?? "Unknown error" },
+        });
+        toast({
+          title:       "Erreur de connexion",
+          description: "Email ou mot de passe incorrect",
+          variant:     "destructive",
+        });
+        return;
+      }
+
+      // ── 2. Fetch role, name, lastName from the profile table ───────────────
+      const { data: profile, error: profileError } = await supabase
         .from("users_atelier")
-        .select("*")
+        .select(`id, email, name, "lastName", role`)
         .eq("email", email)
-        .single();
+        .maybeSingle();
 
-      if (error || !data) {
+      if (profileError) {
+        console.error("[Login] Profile fetch error:", profileError.message);
+      }
+
+      if (!profile?.role) {
+        await supabase.auth.signOut();
         toast({
-          title: "Erreur de connexion",
-          description: "Email ou mot de passe incorrect",
-          variant: "destructive",
+          title:       "Erreur",
+          description: "Profil introuvable. Contactez l'administrateur.",
+          variant:     "destructive",
         });
-        setIsLoading(false);
         return;
       }
 
-      // Plain-text password check
-      if (data.password !== password) {
-        toast({
-          title: "Erreur de connexion",
-          description: "Email ou mot de passe incorrect",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      const authenticatedUser = {
-        id: String(data.id ?? data.uuid ?? data.email),
-        email: data.email,
-        name: data.name ?? data.firstName ?? "",
-        lastName: data.lastName ?? "",
-        role: (data.role === "admin"
+      // ── 3. Build user object ───────────────────────────────────────────────
+      const authenticatedUser: User = {
+        id:       authData.user.id,
+        email:    authData.user.email ?? email,
+        name:     profile.name ?? "",
+        lastName: profile.lastName ?? "",
+        role:     (profile.role === "admin"
           ? "admin"
-          : data.role === "reception"
+          : profile.role === "reception"
           ? "reception"
           : "viewer") as User["role"],
-        password: data.password, // Keep the password for context if needed elsewhere, though not usually recommended
       };
 
-      setUser(authenticatedUser);
-      try {
-        window.localStorage.setItem(
-          "auth:user",
-          JSON.stringify(authenticatedUser)
-        );
-      } catch (err) {
-        console.error("Error saving to local storage:", err);
-      }
+      // ── 4. Log success ─────────────────────────────────────────────────────
+      await logSecurityEvent({
+        event_type:  "login_attempt",
+        severity:    "low",
+        status_code: 200,
+        user_id:     authenticatedUser.id,
+        endpoint:    "/auth/login",
+        method:      "POST",
+        metadata:    { email },
+      });
 
+      // ── 5. Set user immediately (context's onAuthStateChange will also fire,
+      //       but this gives instant navigation with no flicker) ───────────────
+      setUser(authenticatedUser);
+
+      // ── 6. Redirect by role ────────────────────────────────────────────────
       if (authenticatedUser.role === "reception") {
         navigate("/dashboard", { replace: true });
       } else {
@@ -100,11 +122,11 @@ export const Login: React.FC = () => {
         }`,
       });
     } catch (err) {
-      console.error(err);
+      console.error("[Login] Unexpected error:", err);
       toast({
-        title: "Erreur",
+        title:       "Erreur",
         description: "Une erreur est survenue lors de la connexion",
-        variant: "destructive",
+        variant:     "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -143,10 +165,7 @@ export const Login: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="email"
-                    className="text-automotive-dark font-medium"
-                  >
+                  <Label htmlFor="email" className="text-automotive-dark font-medium">
                     Email
                   </Label>
                   <div className="relative">
@@ -164,10 +183,7 @@ export const Login: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="password"
-                    className="text-automotive-dark font-medium"
-                  >
+                  <Label htmlFor="password" className="text-automotive-dark font-medium">
                     Mot de passe
                   </Label>
                   <div className="relative">

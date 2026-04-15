@@ -20,7 +20,17 @@ const ProtectedRoute: React.FC<{
   requireRole?: "reception" | "viewer";
   requireRoles?: Array<"reception" | "viewer" | "admin">;
 }> = ({ children, requireRole, requireRoles }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
+
+  // Wait for Supabase Auth to restore the session before deciding anything.
+  // Without this, a page refresh would always flash-redirect to /login.
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -38,14 +48,18 @@ const ProtectedRoute: React.FC<{
 };
 
 const AppRoutes = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
+  // While restoring the session, show nothing (ProtectedRoute handles its own spinner)
+  // but prevent the /login redirect from firing prematurely
   return (
     <Routes>
       <Route
         path="/login"
         element={
-          isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />
+          !loading && isAuthenticated
+            ? <Navigate to="/dashboard" replace />
+            : <Login />
         }
       />
       <Route path="/" element={<Layout />}>

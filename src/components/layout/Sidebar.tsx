@@ -132,8 +132,8 @@ export const Sidebar: React.FC = () => {
           <Button
             variant="ghost"
             className="w-full justify-start text-muted-foreground hover:text-destructive"
-            onClick={() => {
-              logout();
+            onClick={async () => {
+              await logout();
               close();
             }}
           >
