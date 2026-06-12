@@ -1,9 +1,8 @@
 export interface User {
-  id: string;
+  id: string;              // matches auth.users.id (UUID)
   email: string;
   name: string;
   lastName: string;
-  password?: string; // no longer stored after Supabase Auth migration
   role: 'reception' | 'viewer' | 'admin';
 }
 
@@ -36,7 +35,7 @@ export interface StatusChange {
   notes?: string;
 }
 
-export type RepairStatus = 
+export type RepairStatus =
   | 'En cours de démontage'
   | 'En Attente de devis'
   | 'Hors atelier'
